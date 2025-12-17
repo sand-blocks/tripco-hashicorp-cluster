@@ -1,34 +1,29 @@
----
-- name: Provision UFW firewall rules
-  hosts: all
-  become: true
 
-  tasks:
-    - name: Install UFW
-      apt:
-        name: ufw
-        state: present
-        update_cache: yes
+- name: Install UFW
+  apt:
+    name: ufw
+    state: present
+    update_cache: yes
 
-    - name: Allow SSH connections
-      ufw:
-        rule: allow
-        name: OpenSSH
+- name: Allow SSH connections
+  ufw:
+    rule: allow
+    name: OpenSSH
 
-    - name: Allow Nomad server communication ports
-      ufw:
-        rule: allow
-        port: "{{ item }}"
-        proto: tcp
-      loop:
-        - 4647    # Nomad server RPC
-        - 4648    # Nomad serf LAN
-        - 8500    # Consul HTTP API
+- name: Allow Nomad server communication ports
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - 4647    # Nomad server RPC
+    - 4648    # Nomad serf LAN
+    - 8500    # Consul HTTP API
 
 
-    - name: Enable UFW to block all other traffic
-      ufw:
-        state: disabled # diabled to prevent locking out during provisioning  
-        policy: deny
-        logging: on
-        direction: incoming
+- name: Enable UFW to block all other traffic
+  ufw:
+    state: disabled # diabled to prevent locking out during provisioning  
+    policy: deny
+    logging: on
+    direction: incoming
