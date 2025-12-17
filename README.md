@@ -178,11 +178,11 @@ ansible-playbook -i hosts.ini provision_cluster.yaml
 ```
 
 This will take 5-10 minutes. The playbook will:
-- ✓ Update system packages
-- ✓ Install Docker on all nodes
-- ✓ Install and configure Consul agents
-- ✓ Install and configure Nomad servers/clients
-- ✓ Set up firewall rules
+✓ Update system packages
+✓ Install Docker on all nodes
+✓ Install and configure Consul agents
+✓ Install and configure Nomad servers/clients
+✓ Set up firewall rules
 - ✓ Configure security hardening
 
 **3.2 Verify the cluster (OPTIONAL)**
@@ -445,7 +445,7 @@ curl http://nomad-server-1:8080
 
 ## Orchastration Optimization
 
-1. **Implement CI/CD DevOps Best Practices
+1. **Implement CI/CD DevOps Best Practices**
 
 There should be a well defined workflow which ensures the version control repositories are monitored and automatically triggered when changes need to take places. While this is somewhat of an automated approach, proper seperation of concerns for IaC, Configuration Management, CI/CD pipelines could definitely be leveraged.
 
