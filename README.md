@@ -463,3 +463,6 @@ After completing this tutorial, consider:
 4. **Set up CI/CD** pipeline for automated deployments
 5. **Configure backups** for disaster recovery
 6. **Add more applications** to the cluster
+7. **Keep building cool stuff at LekkeSlaap ;)**
+
+Thank you for coming to my TED talk!
