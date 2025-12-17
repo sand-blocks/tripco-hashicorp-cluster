@@ -1,0 +1,17 @@
+---
+- name: Deploy Nginx LB image to nomad cluster
+  hosts: servers[0]
+
+  tasks:
+    - name: Create Nomad job file for nginx loadbalancer
+      template:
+        src: templates/nomad-nginx-lb-job.hcl.j2
+        dest: "/tmp/{{ job_name }}.nomad"
+
+    - name: Deploy Nomad job
+      command: nomad job run /tmp/{{ job_name }}.nomad
+      register: nomad_job_result
+
+    - name: Display Nomad job submission result
+      debug:
+        var: nomad_job_result.stdout

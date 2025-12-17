@@ -1,0 +1,21 @@
+---
+- name: Deploy docker image to Nomad cluster
+  hosts: servers[0]
+  vars:
+    webapp_docker_image: "charlin/tripco-webapp:latest"
+    job_name: "webapp-backend"
+    service_port: 8080
+
+  tasks:
+    - name: Create Nomad job file for webapp
+      template:
+        src: templates/nomad-webapp-job.hcl.j2
+        dest: "/tmp/{{ job_name }}.nomad"
+
+    - name: Deploy Nomad job
+      command: nomad job run /tmp/{{ job_name }}.nomad
+      register: nomad_job_result
+
+    - name: Display Nomad job submission result
+      debug:
+        var: nomad_job_result.stdout

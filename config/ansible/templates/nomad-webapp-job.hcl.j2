@@ -1,0 +1,36 @@
+job "{{ job_name }}" {
+    datacenters = ["*"]
+    type = "service"
+
+    group "servers" {
+        count = {{ groups['servers'] | length }}
+
+        network {
+            port "http" {
+                static = 8080
+            }
+        }
+
+        task "container" {
+            driver = "docker"
+
+            config {
+                image = "{{ webapp_docker_image }}"
+                ports = ["http"]
+            }
+
+            service {
+                name = "{{ job_name }}"
+                port = "http"
+
+                check {
+                    type     = "http"
+                    path     = "/"
+                    interval = "10s"
+                    timeout  = "2s"
+                }
+            }
+            
+        }
+    }
+}

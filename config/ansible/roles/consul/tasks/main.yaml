@@ -1,0 +1,72 @@
+---
+- name: Add HashiCorp GPG key
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+
+- name: Add HashiCorp repository
+  apt_repository:
+    repo: deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+    state: present
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    
+- name: Ensure Consul user exists
+  user:
+    name: "{{ consul_user }}"
+    shell: /sbin/nologin
+
+- name: Ensure necessary directories exist
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+    mode: '0755'
+  with_items:
+    - "{{ consul_config_dir }}"
+    - "{{ consul_data_dir }}"
+    - "{{ consul_log_dir }}"
+
+- name: Install Consul
+  apt:
+    name: consul
+    state: present
+
+- name: Create Consul configuration file
+  template:
+    src: templates/consul.hcl.j2
+    dest: "{{ consul_config_dir }}/consul.hcl"
+    owner: "{{ consul_user }}"
+    group: "{{ consul_group }}"
+    mode: '0644'
+  notify: Restart Consul
+
+- name: Fetch Configuration
+  fetch:
+    src: "{{ consul_config_dir }}/consul.hcl"
+    dest: "{{ playbook_dir }}/../samples/consul-{{ nomad_type }}.hcl"
+    flat: yes
+
+- name: Create Consul service file
+  template:
+    src: templates/consul.service.j2
+    dest: /etc/systemd/system/consul.service
+    mode: '0644'
+  notify: Restart Consul  
+
+- name: Enable and start Consul service
+  systemd:
+    name: consul
+    enabled: yes
+    state: started
+
+- name: Verify Consul installation
+  command: consul version
+  register: consul_version
+
+- name: Display Consul version
+  debug:
+    msg: "Consul version installed: {{ consul_version.stdout }}"

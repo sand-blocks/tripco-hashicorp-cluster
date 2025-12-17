@@ -1,0 +1,104 @@
+- name: Add HashiCorp GPG key
+  apt_key:
+    url: https://apt.releases.hashicorp.com/gpg
+    state: present
+
+- name: Add HashiCorp repository
+  apt_repository:
+    repo: deb [arch=amd64] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main
+    state: present
+
+- name: Update apt cache
+  apt:
+    update_cache: yes
+
+- name: Install Nomad
+  apt:
+    name: nomad
+    state: present
+
+- name: Create Shared Directories
+  file:
+    dest: "{{ item }}"
+    state: directory
+    owner: "{{ nomad_user }}"
+    group: "{{ nomad_user }}"
+    mode: '0755'
+  with_items: 
+    - "/opt/nomad"
+    - "/mnt/shared"
+    
+- name: Check if Docker group exists
+  command: getent group docker
+  register: docker_group_exists
+  ignore_errors: true
+
+- name: Add Nomad user to Docker group
+  command: usermod -aG docker {{ nomad_user }}
+  when: docker_group_exists.rc == 0
+  ignore_errors: true
+
+- name: Restart Docker to apply group changes
+  service:
+    name: docker
+    state: restarted
+  when: docker_group_exists.rc == 0
+
+- name: Create directories
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ nomad_user }}"
+    group: "{{ nomad_user }}"
+    mode: '0755'
+  with_items:
+    - "{{ nomad_config_dir }}"
+    - "{{ nomad_data_dir }}"
+
+
+- name: Create Nomad configuration file
+  template:
+    src: nomad-config.hcl.j2
+    dest: "{{ nomad_config_dir }}/nomad.hcl"
+    owner: "{{ nomad_user }}"
+    group: "{{ nomad_user }}"
+    mode: '0644'
+  notify: Restart Nomad
+
+
+- name: Fetch Configuration
+  fetch:
+    src: "{{ nomad_config_dir }}/nomad.hcl"
+    dest: "{{ playbook_dir }}/../samples/nomad-{{ nomad_type }}.hcl"
+    flat: yes
+
+
+- name: Create sysctl configuration for bridge network
+  copy:
+    dest: /etc/sysctl.d/bridge.conf
+    content: |
+      net.bridge.bridge-nf-call-arptables = 1
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+
+- name: Create Nomad service file
+  template:
+    src: nomad.service.j2
+    dest: /etc/systemd/system/nomad.service
+    mode: '0644'
+
+- name: Enable and start Nomad service
+  systemd:
+    name: nomad
+    enabled: yes
+    state: started
+  notify: Restart Nomad
+
+
+- name: Verify Nomad installation
+  command: nomad version
+  register: nomad_version
+
+- name: Display Nomad version
+  debug:
+    msg: "Nomad version installed: {{ nomad_version.stdout }}"

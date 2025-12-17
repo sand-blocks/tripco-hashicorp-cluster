@@ -1,0 +1,20 @@
+---
+- name: Bootstrap Consul and Store in Vault
+  hosts: consul_servers
+  run_once: true
+  tasks:
+    - name: Bootstrap Consul ACLs
+      community.general.consul_acl_bootstrap:
+        host: servers[0]
+      register: consul_bootstrap
+      no_log: true # Protect secret from Ansible logs
+
+    - name: Store Consul Management Token in Vault
+      community.hashi_vault.vault_kv2_write:
+        url: "{{ vault_addr }}"
+        engine_mount_point: "secret"
+        path: "infrastructure/consul"
+        data:
+          management_token: "{{ consul_bootstrap.secret_id }}"
+          accessor_id: "{{ consul_bootstrap.accessor_id }}"
+      delegate_to: localhost

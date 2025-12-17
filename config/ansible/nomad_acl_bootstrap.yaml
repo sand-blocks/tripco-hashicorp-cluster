@@ -1,0 +1,24 @@
+---
+- name: Bootstrap Nomad and Store in Vault
+  hosts: nomad_servers
+  run_once: true
+  tasks:
+    - name: Bootstrap Nomad ACL system
+      community.general.nomad_token:
+        host: servers[0]
+        token_type: "bootstrap"
+        state: present
+      register: nomad_bootstrap
+      no_log: true
+
+    - name: Store Nomad Management Token in Vault
+      community.hashi_vault.vault_kv2_write:
+        url: "{{ vault_addr }}"
+        engine_mount_point: "secret"
+        path: "infrastructure/nomad"
+        data:
+          management_token: "{{ nomad_bootstrap.secret_id }}"
+          accessor_id: "{{ nomad_bootstrap.accessor_id }}"
+      delegate_to: localhost
+
+

@@ -1,0 +1,9 @@
+---
+- hosts: servers
+  become: true
+  roles:
+    - docker
+    - consul
+    - nomad
+    - ufw
+    - fail2ban

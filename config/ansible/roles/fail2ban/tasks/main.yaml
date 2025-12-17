@@ -1,0 +1,30 @@
+---
+- name: Provision fail2ban for nomad servers
+  hosts: servers
+  become: true
+
+  tasks:
+    - name: Install fail2ban
+      apt:
+        name: fail2ban
+        state: present
+        update_cache: yes
+
+    - name: Configure fail2ban for SSH
+      copy:
+        dest: /etc/fail2ban/jail.local
+        content: |
+          [sshd]
+          enabled = true
+          port = ssh
+          filter = sshd
+          logpath = /var/log/auth.log
+          maxretry = 5
+          bantime = 600
+          findtime = 600
+
+    - name: Restart fail2ban service
+      service:
+        name: fail2ban
+        state: restarted
+        enabled: yes

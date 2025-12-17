@@ -1,0 +1,4 @@
+nomad_config_dir: /etc/nomad.d
+nomad_install_dir: /usr/bin
+nomad_data_dir: /opt/nomad
+nomad_user: nomad

@@ -1,0 +1,4 @@
+[servers]
+nomad-server-1 nomad_type="server" ansible_ssh_host="SSH_IP" ansible_ssh_user="SSH_USER" ansible_ssh_pass="SSH_PASSWORD" subnet_ip="PRIVATE_SUBNET_IP"
+nomad-server-2 nomad_type="server" ansible_ssh_host="SSH_IP" ansible_ssh_user="SSH_USER" ansible_ssh_pass="SSH_PASSWORD" subnet_ip="PRIVATE_SUBNET_IP"
+nomad-server-3 nomad_type="server" ansible_ssh_host="SSH_IP" ansible_ssh_user="SSH_USER" ansible_ssh_pass="SSH_PASSWORD" subnet_ip="PRIVATE_SUBNET_IP"
