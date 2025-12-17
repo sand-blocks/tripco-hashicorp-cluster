@@ -1,4 +1,4 @@
-# HashiCorp Cluster Infrastructure
+# HashiCorp Cluster Infrastructure Provisioning
 
 ## Overview
 
